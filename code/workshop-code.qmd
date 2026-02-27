@@ -1,14 +1,14 @@
 ---
 title: "Workshop 8 TEMPLATE"
-subtitle: "insert your section time here"
-author: "insert your name here"
-date: "insert your name here"
+subtitle: "12 PM"
+author: "Sofia Perez"
+date: "2026-02-27"
 format:
   html:
     toc: true # use this to display a table of contents
 execute:
   message: false # use this to make sure messages don't show up
-  warning: false # use this to make sure warnings don't show upl
+  warning: false # use this to make sure warnings don't show up
 ---
 
 In this workshop, we will answer the question: How do specific leaf area, water treatment, and species influence plant mass?  
@@ -17,7 +17,7 @@ In this workshop, we will answer the question: How do specific leaf area, water 
 
 **Water treatment** is a categorical variable (i.e. a *factor*) with 2 levels: drought stressed (DS) and well watered (WW).  
 
-**Species** is a categorical variable (again, a *factor*) with 6 levels.  
+**Species** is a categorical variable (again, a *factor*) with 7 levels.  
 
 | Species name                 | Species code | Common name        |
 |------------------------------|--------------|--------------------|
@@ -44,7 +44,13 @@ library(ggeffects) # getting model predictions
 library(MuMIn) # model selection
 
 # read in your data here
-
+drought_exp <- read_xlsx(
+  here(
+    "data",
+    "Valliere_etal_EcoApps_Data.xlsx"
+  ),
+  sheet = "First Harvest"
+)
 
 
 ```
@@ -78,11 +84,11 @@ Data source: Valliere, Justin; Zhang, Jacqueline; Sharifi, M.; Rundel, Philip (2
 #| label: data cleaning
 
 # 
-drought_exp_clean <- drought_exp 
-  # 
-  clean_names() 
-  # 
-  mutate(species_name = case_match(
+drought_exp_clean <- drought_exp |> 
+  # create new object
+  clean_names() |> 
+  # clean column names to lowercase and underscores
+  mutate(species_name = case_match(  
     species,
     "ENCCAL" ~ "Encelia californica", # bush sunflower
     "ESCCAL" ~ "Eschscholzia californica", # California poppy
@@ -91,15 +97,16 @@ drought_exp_clean <- drought_exp
     "SALLEU" ~ "Salvia leucophylla", # purple sage
     "STIPUL" ~ "Stipa pulchra", # purple needlegrass
     "LOTSCO" ~ "Lotus scoparius" # deerweed
-  )) 
-  # 
-  mutate(water_treatment = case_match(
+  )) |>
+  # water treatment column creation with well watered and drought stressed values
+  mutate(water_treatment = case_match( 
     water,
     "WW" ~ "Well watered",
     "DS" ~ "Drought stressed"
-  ))  
-  # 
-  mutate(species_name = as_factor(species_name),
+  ))  |>
+  # makes the categorical variable into a factor so it can be used in models
+  # # relevel gives order
+  mutate(species_name = as_factor(species_name), 
          species_name = fct_relevel(species_name,
                                     "Lotus scoparius",
                                     "Penstemon centranthifolius",
@@ -107,13 +114,13 @@ drought_exp_clean <- drought_exp
                                     "Encelia californica",
                                     "Stipa pulchra",
                                     "Eschscholzia californica",
-                                    "Grindelia camporum")) 
-  mutate(water_treatment = as_factor(water_treatment),
+                                    "Grindelia camporum")) |>
+  mutate(water_treatment = as_factor(water_treatment), 
          water_treatment = fct_relevel(water_treatment,
                                        "Drought stressed",
-                                       "Well watered")) 
-  #
-  select(species_name, water_treatment, sla, total_g)
+                                       "Well watered")) |>
+  # select only the four columns listed
+  select(species_name, water_treatment, sla, total_g) 
 ```
 
 Insert code to double check the structure of the data frame here.  

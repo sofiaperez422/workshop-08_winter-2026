@@ -383,11 +383,42 @@ Rename the `x` column and `group` column to match the original data frame (`drou
 
 Look at the object before plotting.
 
+```{r}
+preds <- ggpredict(model4,
+                  terms = c("water_treatment",
+                            "species_name")) |> 
+  rename(water_treatment = x,
+         species_name = group)
+```
 
 
 # 5. Final figure
 
 Create a clean, publication ready figure depicting predictions for the best model and the underlying data.
+
+```{r}
+#| label: Final publication figure
+ggplot(data = drought_exp_clean,
+       aes(x = water_treatment,
+           y = total_g)) +
+  geom_jitter(height = 0,
+              width = 0.2,
+              alpha = 0.5,
+              shape = 21) +
+  geom_pointrange(data = preds,
+                  aes(x = water_treatment,
+                      y = predicted,
+                      ymin = conf.low,
+                      ymax = conf.high)) + 
+  scale_color_manual(values = c("Drought stressed" = ds_col,
+                                "Well watered" = ww_col)) +
+  scale_x_discrete(labels = label_wrap(10)) +
+  labs(x = "Treatment",
+       y = "Plant mass (g)") +
+    facet_wrap(~ species_name,
+               nrow = 1) + 
+    theme(legend.position = "none")
+```
 
 
 # 6. Writing
